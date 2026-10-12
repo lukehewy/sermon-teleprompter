@@ -217,7 +217,7 @@
              "神啊，我需要祢。愿圣灵充满我——弗5:18：不要醉酒，酒能使人放荡；乃要被圣灵充满。"] }
   ];
 
-  var idx = 0, fs = 34, MINFS = 22, manual = false;
+  var idx = 0, fs = 34, READMIN = 28, manual = false;
   var root = document.documentElement;
   var ptitle = document.getElementById('ptitle');
   var pbody = document.getElementById('pbody');
@@ -234,7 +234,8 @@
     try { localStorage.setItem(SETKEY, JSON.stringify({ fs: fs, manual: manual })); } catch (e) {}
   }
 
-  // 自动缩小字号直到本页内容一屏放下（不再上下滚动）
+  // 自动模式：尽量一屏放下，但字不缩到看不清；
+  // 小屏实在放不下时，保持可读字号、允许滚动看全
   function fitPage() {
     manual = false;
     page.classList.remove('free');
@@ -242,10 +243,14 @@
     root.style.setProperty('--fs', fs + 'px');
     var cur = fs;
     var guard = 0;
-    while (page.scrollHeight > page.clientHeight + 2 && cur > MINFS && guard < 40) {
+    while (page.scrollHeight > page.clientHeight + 2 && cur > READMIN && guard < 40) {
       cur -= 2;
       root.style.setProperty('--fs', cur + 'px');
       guard++;
+    }
+    if (page.scrollHeight > page.clientHeight + 2) {
+      page.classList.add('free');
+      page.style.overflowY = 'auto';
     }
     saveSettings();
   }
