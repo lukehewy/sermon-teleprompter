@@ -20,8 +20,9 @@
                    border: 1px solid #555; background: transparent; color: inherit;
                    cursor: pointer; }
   body.light #topbar button { border-color: #bbb; }
-  #page { flex: 1; display: flex; flex-direction: column; justify-content: center;
-          padding: 24px 48px; overflow-y: auto; }
+  #page { flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
+          padding: 20px 44px; overflow: hidden; }
+  #pageinner { margin: auto 0; width: 100%; }
   #ptitle { font-size: calc(var(--fs) * 1.15); font-weight: bold; color: #ffd54a;
             margin-bottom: 28px; line-height: 1.4; }
   body.light #ptitle { color: #8a6d1b; }
@@ -36,7 +37,7 @@
   #nav button:active { background: #2c2c2c; }
   #nav #next { background: #0d3b2e; color: #fff; font-weight: bold; }
   #nav #next:active { background: #147a5b; }
-  :root { --fs: 44px; }
+  :root { --fs: 34px; }
 </style>
 </head>
 <body>
@@ -45,13 +46,16 @@
       <button id="smaller">A−</button>
       <button id="bigger">A＋</button>
       <button id="theme">🌙/☀️</button>
+      <button id="full">⛶</button>
     </div>
     <div id="pagenum">1 / 1</div>
   </div>
 
   <div id="page">
+   <div id="pageinner">
     <div id="ptitle"></div>
     <div id="pbody"></div>
+   </div>
   </div>
 
   <div id="nav">
@@ -172,15 +176,17 @@
              "李文斯顿：少年家贫，经常吃了上顿没下顿；发奋读书，在格拉斯哥当学徒。",
              "决志献身传教，立志到中国，门未开，转往非洲；中年丧偶仍孜孜不倦。",
              "在非洲30余年，发现维多利亚湖；最看重的却是向土著传讲基督。临终时，人们发现他跪在床前祷告离世。"] },
-    { title: "郭维德",
+    { title: "郭维德（一）",
       body: ["郭维德（1802-1834），美国人，31岁英年早逝。",
-             "中国基督教新教传教先驱，《东西洋考每月统纪传》主编；母亲为他取名维德，意为维护真道。",
-             "首创中文基督二字翻译；新教在华第一位学习中文的传教士；第一位把基督教传到泰国的；第一位向中国人介绍西医、西医院（1830广州）；创办最早中文报刊；协助马礼逊译经。",
+             "中国基督教新教传教先驱，《东西洋考每月统纪传》主编；母亲为他取名维德，意为维护真道。"] },
+    { title: "郭维德（二）",
+      body: ["首创中文基督二字翻译；新教在华第一位学习中文的传教士；第一位把基督教传到泰国的；第一位向中国人介绍西医、西医院（1830广州）；创办最早中文报刊；协助马礼逊译经。",
              "马礼逊在华27年受洗10人；郭维德在泰华宣教7年受洗3500人。"] },
-    { title: "郭实猎与中国教会",
+    { title: "郭实猎（一）",
       body: ["郭实猎1831年来华：布道、行医、办学、建堂，设福汉会，培养中国传道人；",
-             "语言天才：通福建、广东话、潮州话；把新约部分译成日文（日本最早），旧约部分译成泰文（泰国最早）；有中国传教士之王之称。",
-             "梁发受他影响，在广东建立教会，成为中国第一位华人牧师。",
+             "语言天才：通福建、广东话、潮州话；把新约部分译成日文（日本最早），旧约部分译成泰文（泰国最早）；有中国传教士之王之称。"] },
+    { title: "郭实猎（二）",
+      body: ["梁发受他影响，在广东建立教会，成为中国第一位华人牧师。",
              "中国教会经历许多艰难，却没有消亡，反而更加兴旺发达！"] },
     { title: "三、对外：服侍的能力",
       body: ["圣灵在我们里面工作，使我们满结果子；但不止如此，圣灵还要在我们外面工作——",
@@ -200,19 +206,33 @@
       body: ["我们教会是一个拼图：每一块都有自己的位置、作用；每一块都重要、都必不可少。",
              "发挥自己的恩赐，发挥自己的作用。",
              "得恩赐，是为叫人得益处——不是我得益处，是众人得益处。"] },
-    { title: "应用：回应呼召",
+    { title: "应用：回应呼召（一）",
       body: ["我们一起来回应圣灵的工作。",
              "圣灵已经在每个人生命里做工，祂等待我们的回应；圣灵的应许是给每一个人的。",
-             "祷告：神啊，把圣灵赐给我，把祂运行在我里面的能力赐给我，我要顺服祂。",
-             "我要学习祷告，渴望顺服神的话语；学习让祂帮助我做人生的选择。",
+             "祷告：神啊，把圣灵赐给我，把祂运行在我里面的能力赐给我，我要顺服祂。"] },
+    { title: "应用：回应呼召（二）",
+      body: ["我要学习祷告，渴望顺服神的话语；学习让祂帮助我做人生的选择。",
              "神啊，我需要祢。愿圣灵充满我——弗5:18：不要醉酒，酒能使人放荡；乃要被圣灵充满。"] }
   ];
 
-  var idx = 0, fs = 44;
+  var idx = 0, fs = 34, MINFS = 22;
   var root = document.documentElement;
   var ptitle = document.getElementById('ptitle');
   var pbody = document.getElementById('pbody');
   var pagenum = document.getElementById('pagenum');
+  var page = document.getElementById('page');
+
+  // 自动缩小字号直到本页内容一屏放下（不再上下滚动）
+  function fitPage() {
+    root.style.setProperty('--fs', fs + 'px');
+    var cur = fs;
+    var guard = 0;
+    while (page.scrollHeight > page.clientHeight + 2 && cur > MINFS && guard < 40) {
+      cur -= 2;
+      root.style.setProperty('--fs', cur + 'px');
+      guard++;
+    }
+  }
 
   function render() {
     var p = PAGES[idx];
@@ -225,7 +245,8 @@
       pbody.appendChild(el);
     });
     pagenum.textContent = (idx + 1) + ' / ' + PAGES.length;
-    document.getElementById('page').scrollTop = 0;
+    page.scrollTop = 0;
+    fitPage();
   }
   function next() { if (idx < PAGES.length - 1) { idx++; render(); } }
   function prev() { if (idx > 0) { idx--; render(); } }
@@ -241,15 +262,22 @@
     if (e.clientX > w * 0.75) next();
     else if (e.clientX < w * 0.25) prev();
   });
+  // 横竖屏切换时重算字号
+  window.addEventListener('resize', fitPage);
 
   document.getElementById('bigger').addEventListener('click', function () {
-    fs = Math.min(fs + 6, 96); root.style.setProperty('--fs', fs + 'px');
+    fs = Math.min(fs + 4, 72); fitPage();
   });
   document.getElementById('smaller').addEventListener('click', function () {
-    fs = Math.max(fs - 6, 24); root.style.setProperty('--fs', fs + 'px');
+    fs = Math.max(fs - 4, 20); fitPage();
   });
   document.getElementById('theme').addEventListener('click', function () {
     document.body.classList.toggle('light');
+  });
+  document.getElementById('full').addEventListener('click', function () {
+    var el = document.documentElement;
+    if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+    else if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
   });
 
   render();
