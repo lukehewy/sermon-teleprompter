@@ -215,7 +215,7 @@
              "神啊，我需要祢。愿圣灵充满我——弗5:18：不要醉酒，酒能使人放荡；乃要被圣灵充满。"] }
   ];
 
-  var idx = 0, fs = 34, MINFS = 22;
+  var idx = 0, fs = 34, MINFS = 22, manual = false;
   var root = document.documentElement;
   var ptitle = document.getElementById('ptitle');
   var pbody = document.getElementById('pbody');
@@ -224,6 +224,8 @@
 
   // 自动缩小字号直到本页内容一屏放下（不再上下滚动）
   function fitPage() {
+    manual = false;
+    page.style.overflowY = 'hidden';
     root.style.setProperty('--fs', fs + 'px');
     var cur = fs;
     var guard = 0;
@@ -232,6 +234,12 @@
       root.style.setProperty('--fs', cur + 'px');
       guard++;
     }
+  }
+  // 手动调字号：听用户的，不自动缩；放太大时允许滚动
+  function manualSize() {
+    manual = true;
+    page.style.overflowY = 'auto';
+    root.style.setProperty('--fs', fs + 'px');
   }
 
   function render() {
@@ -262,14 +270,14 @@
     if (e.clientX > w * 0.75) next();
     else if (e.clientX < w * 0.25) prev();
   });
-  // 横竖屏切换时重算字号
-  window.addEventListener('resize', fitPage);
+  // 横竖屏切换时重算字号（手动模式下保持用户字号）
+  window.addEventListener('resize', function () { if (!manual) fitPage(); });
 
   document.getElementById('bigger').addEventListener('click', function () {
-    fs = Math.min(fs + 4, 72); fitPage();
+    fs = Math.min(fs + 4, 72); manualSize();
   });
   document.getElementById('smaller').addEventListener('click', function () {
-    fs = Math.max(fs - 4, 20); fitPage();
+    fs = Math.max(fs - 4, 20); manualSize();
   });
   document.getElementById('theme').addEventListener('click', function () {
     document.body.classList.toggle('light');
