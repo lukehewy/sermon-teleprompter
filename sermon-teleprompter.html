@@ -23,6 +23,7 @@
   #page { flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
           padding: 20px 44px; overflow: hidden; }
   #pageinner { margin: auto 0; width: 100%; }
+  #page.free #pageinner { margin: 0; }
   #ptitle { font-size: calc(var(--fs) * 1.15); font-weight: bold; color: #ffd54a;
             margin-bottom: 28px; line-height: 1.4; }
   body.light #ptitle { color: #8a6d1b; }
@@ -45,6 +46,7 @@
     <div class="grp">
       <button id="smaller">A−</button>
       <button id="bigger">A＋</button>
+      <button id="autofit">自动</button>
       <button id="theme">🌙/☀️</button>
       <button id="full">⛶</button>
     </div>
@@ -221,10 +223,21 @@
   var pbody = document.getElementById('pbody');
   var pagenum = document.getElementById('pagenum');
   var page = document.getElementById('page');
+  var SETKEY = 'sermon-teleprompter-v1';
+
+  // 记住用户的字号偏好（手机和 tablet 各记各的）
+  try {
+    var sv = JSON.parse(localStorage.getItem(SETKEY) || 'null');
+    if (sv && sv.fs >= 20 && sv.fs <= 72) { fs = sv.fs; manual = !!sv.manual; }
+  } catch (e) {}
+  function saveSettings() {
+    try { localStorage.setItem(SETKEY, JSON.stringify({ fs: fs, manual: manual })); } catch (e) {}
+  }
 
   // 自动缩小字号直到本页内容一屏放下（不再上下滚动）
   function fitPage() {
     manual = false;
+    page.classList.remove('free');
     page.style.overflowY = 'hidden';
     root.style.setProperty('--fs', fs + 'px');
     var cur = fs;
@@ -234,12 +247,15 @@
       root.style.setProperty('--fs', cur + 'px');
       guard++;
     }
+    saveSettings();
   }
-  // 手动调字号：听用户的，不自动缩；放太大时允许滚动
+  // 手动调字号：听用户的，不自动缩；字号翻页保持，放太大时允许滚动
   function manualSize() {
     manual = true;
+    page.classList.add('free');
     page.style.overflowY = 'auto';
     root.style.setProperty('--fs', fs + 'px');
+    saveSettings();
   }
 
   function render() {
@@ -254,7 +270,7 @@
     });
     pagenum.textContent = (idx + 1) + ' / ' + PAGES.length;
     page.scrollTop = 0;
-    fitPage();
+    if (manual) manualSize(); else fitPage();
   }
   function next() { if (idx < PAGES.length - 1) { idx++; render(); } }
   function prev() { if (idx > 0) { idx--; render(); } }
@@ -278,6 +294,10 @@
   });
   document.getElementById('smaller').addEventListener('click', function () {
     fs = Math.max(fs - 4, 20); manualSize();
+  });
+  // 回到自动一屏模式
+  document.getElementById('autofit').addEventListener('click', function () {
+    fitPage();
   });
   document.getElementById('theme').addEventListener('click', function () {
     document.body.classList.toggle('light');
