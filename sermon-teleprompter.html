@@ -26,6 +26,9 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   #topbar button { font-size: 16px; padding: 8px 14px; border-radius: 10px;
                    border: 1px solid #555; background: transparent; color: inherit;
                    cursor: pointer; }
+  #installBtn { display: none; border-color: #ffd54a !important; color: #ffd54a !important; }
+  #installBtn.show { display: inline-block; }
+  body.light #installBtn { border-color: #8a6d1b !important; color: #8a6d1b !important; }
   body.light #topbar button { border-color: #bbb; }
   #page { flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
           padding: 20px 44px; overflow: hidden; }
@@ -56,6 +59,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
       <button id="autofit">自动</button>
       <button id="theme">🌙/☀️</button>
       <button id="full">⛶</button>
+      <button id="installBtn">📲 安装</button>
     </div>
     <div id="pagenum">1 / 1</div>
   </div>
@@ -345,6 +349,30 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
     else if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
   });
+
+  // 页内安装按钮：只有 Chrome 判定可安装时才出现，装完自动消失
+  (function () {
+    var btn = document.getElementById('installBtn');
+    var deferredPrompt = null;
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.navigator.standalone === true;
+    if (isStandalone) return;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      btn.classList.add('show');
+    });
+    window.addEventListener('appinstalled', function () {
+      btn.classList.remove('show');
+      deferredPrompt = null;
+    });
+    btn.addEventListener('click', function () {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+      }
+    });
+  })();
 
   render();
 })();
