@@ -1,0 +1,1 @@
+{"background_color":"#141428","description":"讲道用提词器：一页一屏，蓝牙翻页器可用，离线可用","display":"standalone","icons":[{"sizes":"192x192","src":"./icon-192.png","type":"image/png"},{"sizes":"512x512","src":"./icon-512.png","type":"image/png"}],"name":"讲道提词器","short_name":"提词器","start_url":"./sermon-teleprompter.html","theme_color":"#141428"}
