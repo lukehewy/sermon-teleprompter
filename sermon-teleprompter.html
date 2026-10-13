@@ -360,6 +360,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       deferredPrompt = e;
+      window.__bipFired = true;
       btn.classList.add('show');
     });
     window.addEventListener('appinstalled', function () {
@@ -372,6 +373,42 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
         deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
       }
     });
+  })();
+
+  // 临时诊断条：?debug=1 时显示，查完就删
+  (function () {
+    if (location.search.indexOf('debug') < 0) return;
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:70px;z-index:9999;' +
+      'background:#000;color:#0f0;font:12px monospace;padding:8px;white-space:pre-wrap;';
+    box.textContent = '诊断中…';
+    document.body.appendChild(box);
+    var lines = [];
+    function out() { box.textContent = lines.join('\n'); }
+    lines.push('1 manifest标签: ' + (document.querySelector('link[rel="manifest"]') ? '有' : '无')); out();
+    fetch('./manifest.webmanifest').then(function (r) {
+      lines.push('2 manifest下载: HTTP ' + r.status); out();
+      return r.json();
+    }).then(function (j) {
+      lines.push('3 manifest内容: name=' + j.name + ' icons=' + (j.icons||[]).map(function(i){return i.sizes;}).join(','));
+      out();
+    }).catch(function (e) { lines.push('2 manifest下载失败: ' + e); out(); });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (!reg) { lines.push('4 SW: 未注册'); }
+        else {
+          lines.push('4 SW: 已注册 scope=' + reg.scope +
+            ' active=' + !!reg.active + ' installing=' + !!reg.installing + ' waiting=' + !!reg.waiting);
+        }
+        lines.push('5 SW接管页面: ' + (!!navigator.serviceWorker.controller ? '是' : '否'));
+        out();
+      });
+    } else { lines.push('4 SW: 浏览器不支持'); out(); }
+    setTimeout(function () {
+      lines.push('6 安装事件触发: ' + (window.__bipFired ? '是' : '否'));
+      lines.push('7 显示模式: ' + (matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'));
+      out();
+    }, 6000);
   })();
 
   render();
