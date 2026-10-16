@@ -48,6 +48,16 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   #nav button:active { background: #2c2c2c; }
   #nav #next { background: #0d3b2e; color: #fff; font-weight: bold; }
   #nav #next:active { background: #147a5b; }
+  /* 自动滚动模式 */
+  #page.scrollmode { display: block; overflow-y: auto; }
+  #page.scrollmode #pageinner { margin: 0; }
+  .sec-title { font-size: calc(var(--fs) * 1.15); font-weight: bold; color: #ffd54a;
+               margin: 36px 0 20px; line-height: 1.4; }
+  body.light .sec-title { color: #8a6d1b; }
+  #spdDown, #spdUp { display: none; }
+  body.scrolling #spdDown, body.scrolling #spdUp { display: inline-block; }
+  #scrollToggle.on { border-color: #ffd54a !important; color: #ffd54a !important; }
+  body.light #scrollToggle.on { border-color: #8a6d1b !important; color: #8a6d1b !important; }
   :root { --fs: 34px; }
 </style>
 </head>
@@ -57,6 +67,9 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
       <button id="smaller">A−</button>
       <button id="bigger">A＋</button>
       <button id="autofit">自动</button>
+      <button id="scrollToggle">▶滚动</button>
+      <button id="spdDown">减速</button>
+      <button id="spdUp">加速</button>
       <button id="theme">🌙/☀️</button>
       <button id="full">⛶</button>
       <button id="installBtn">📲 安装</button>
@@ -154,7 +167,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     if (sv && sv.fs >= 20 && sv.fs <= 72) { fs = sv.fs; manual = !!sv.manual; }
   } catch (e) {}
   function saveSettings() {
-    try { localStorage.setItem(SETKEY, JSON.stringify({ fs: fs, manual: manual })); } catch (e) {}
+    try { localStorage.setItem(SETKEY, JSON.stringify({ fs: fs, manual: manual, spd: spd })); } catch (e) {}
   }
 
   // 自动模式：尽量一屏放下，但字不缩到看不清；
@@ -206,10 +219,15 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   document.getElementById('next').addEventListener('click', next);
   document.getElementById('prev').addEventListener('click', prev);
   document.addEventListener('keydown', function (e) {
+    if (scrollOn) {
+      if (e.key === ' ') { togglePause(); e.preventDefault(); }
+      return;
+    }
     if (e.key === 'ArrowRight' || e.key === ' ') next();
     if (e.key === 'ArrowLeft') prev();
   });
   document.getElementById('page').addEventListener('click', function (e) {
+    if (scrollOn) { togglePause(); return; }
     var w = window.innerWidth;
     if (e.clientX > w * 0.75) next();
     else if (e.clientX < w * 0.25) prev();
@@ -218,10 +236,14 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   window.addEventListener('resize', function () { if (!manual) fitPage(); });
 
   document.getElementById('bigger').addEventListener('click', function () {
-    fs = Math.min(fs + 4, 72); manualSize();
+    fs = Math.min(fs + 4, 72);
+    if (scrollOn) { root.style.setProperty('--fs', fs + 'px'); saveSettings(); }
+    else manualSize();
   });
   document.getElementById('smaller').addEventListener('click', function () {
-    fs = Math.max(fs - 4, 20); manualSize();
+    fs = Math.max(fs - 4, 20);
+    if (scrollOn) { root.style.setProperty('--fs', fs + 'px'); saveSettings(); }
+    else manualSize();
   });
   // 回到自动一屏模式
   document.getElementById('autofit').addEventListener('click', function () {
@@ -260,6 +282,77 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
       }
     });
   })();
+
+  /* 自动滚动模式：整篇连起来匀速上滚，速度 1~5 可调 */
+  var scrollOn = false, paused = false, spd = 2, rafId = null, lastT = 0, savedIdx = 0;
+  var SPDS = [0, 16, 30, 48, 72, 100]; /* 每秒像素 */
+  var scrollToggle = document.getElementById('scrollToggle');
+  var nav = document.getElementById('nav');
+  try {
+    var sv2 = JSON.parse(localStorage.getItem(SETKEY) || 'null');
+    if (sv2 && sv2.spd >= 1 && sv2.spd <= 5) spd = sv2.spd;
+  } catch (e2) {}
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function buildScroll() {
+    var h = '';
+    PAGES.forEach(function (p) {
+      h += '<div class="sec-title">' + esc(p.title) + '</div>';
+      p.body.forEach(function (t) {
+        var cls = (/章|節/.test(t) && t.length < 80) ? ' class="verse"' : '';
+        h += '<p' + cls + '>' + esc(t) + '</p>';
+      });
+    });
+    return h;
+  }
+  function updScrollUI() {
+    pagenum.textContent = '滚动中 · 速度' + spd + (paused ? ' · 已暂停' : '');
+    scrollToggle.textContent = paused ? '▶继续' : '⏸暂停';
+  }
+  function setPaused(p) { paused = p; updScrollUI(); }
+  function togglePause() { if (scrollOn) setPaused(!paused); }
+  function loop(t) {
+    if (!scrollOn) return;
+    var dt = (t - lastT) / 1000; lastT = t;
+    if (!paused) {
+      page.scrollTop += SPDS[spd] * dt;
+      if (page.scrollTop + page.clientHeight >= page.scrollHeight - 2) setPaused(true);
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+  function enterScroll() {
+    scrollOn = true; paused = false; savedIdx = idx;
+    document.body.classList.add('scrolling');
+    page.classList.add('scrollmode');
+    page.classList.remove('free');
+    page.style.overflowY = 'auto';
+    ptitle.textContent = '';
+    pbody.innerHTML = buildScroll();
+    root.style.setProperty('--fs', fs + 'px');
+    nav.style.display = 'none';
+    scrollToggle.classList.add('on');
+    page.scrollTop = 0;
+    updScrollUI();
+    cancelAnimationFrame(rafId);
+    lastT = performance.now();
+    rafId = requestAnimationFrame(loop);
+  }
+  function exitScroll() {
+    scrollOn = false; paused = false;
+    cancelAnimationFrame(rafId); rafId = null;
+    document.body.classList.remove('scrolling');
+    page.classList.remove('scrollmode');
+    nav.style.display = '';
+    scrollToggle.classList.remove('on');
+    scrollToggle.textContent = '▶滚动';
+    idx = savedIdx; render();
+  }
+  scrollToggle.addEventListener('click', function () { scrollOn ? exitScroll() : enterScroll(); });
+  document.getElementById('spdDown').addEventListener('click', function () {
+    if (spd > 1) { spd--; saveSettings(); if (scrollOn) updScrollUI(); }
+  });
+  document.getElementById('spdUp').addEventListener('click', function () {
+    if (spd < 5) { spd++; saveSettings(); if (scrollOn) updScrollUI(); }
+  });
 
   render();
 })();
