@@ -72,6 +72,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
       <button id="spdUp">加速</button>
       <button id="theme">🌙/☀️</button>
       <button id="full">⛶</button>
+      <button id="forceUpdate" title="清除缓存并重新加载最新版">⟳更新</button>
       <button id="installBtn">📲 安装</button>
     </div>
     <div id="pagenum">1 / 1</div>
@@ -362,6 +363,23 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   });
   document.getElementById('spdUp').addEventListener('click', function () {
     if (spd < 5) { spd++; saveSettings(); if (scrollOn) updScrollUI(); }
+  });
+
+  /* ⟳更新：一键清除本地缓存并重新加载最新版 */
+  document.getElementById('forceUpdate').addEventListener('click', function () {
+    if (!confirm('要清除本地缓存、重新加载最新版讲章吗？')) return;
+    var done = function () { location.reload(); };
+    if ('caches' in window) {
+      caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }).then(function () {
+        if ('serviceWorker' in navigator) {
+          return navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.update(); }));
+          });
+        }
+      }).then(done, done);
+    } else { done(); }
   });
 
   render();

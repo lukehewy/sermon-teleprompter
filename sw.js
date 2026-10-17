@@ -1,5 +1,5 @@
 /* 讲道提词器离线缓存：装好后没网也能用 */
-var CACHE = 'sermon-tp-v4';
+var CACHE = 'sermon-tp-v5';
 var FILES = [
   './sermon-teleprompter.html',
   './manifest.webmanifest',
@@ -21,7 +21,21 @@ self.addEventListener('activate', function(e){
   );
 });
 self.addEventListener('fetch', function(e){
-  e.respondWith(
-    caches.match(e.request).then(function(r){ return r || fetch(e.request); })
-  );
+  var url = new URL(e.request.url);
+  var isDoc = e.request.mode === 'navigate' ||
+              url.pathname.indexOf('sermon-teleprompter.html') !== -1;
+  if (isDoc) {
+    /* 讲章正文：有网时永远取最新版，断网时才用缓存 */
+    e.respondWith(
+      fetch(e.request).then(function(resp){
+        var copy = resp.clone();
+        caches.open(CACHE).then(function(c){ c.put(e.request, copy); });
+        return resp;
+      }).catch(function(){ return caches.match(e.request); })
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(function(r){ return r || fetch(e.request); })
+    );
+  }
 });
