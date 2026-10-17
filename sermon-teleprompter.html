@@ -22,11 +22,10 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   body.light { background: #fdfbf5; color: #1a1a1a; }
   #topbar { flex: none; display: flex; align-items: center; justify-content: space-between;
             padding: 10px 16px; font-size: 15px; opacity: .85; }
-  #topbar .grp { display: flex; gap: 8px; align-items: center; }
+  #topbar .grp { display: flex; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; min-width: 0; }
   #topbar button { font-size: 16px; padding: 8px 14px; border-radius: 10px;
                    border: 1px solid #555; background: transparent; color: inherit;
                    cursor: pointer; white-space: nowrap; flex: none; }
-  #topbar .grp { overflow-x: auto; scrollbar-width: none; }
   #topbar .grp::-webkit-scrollbar { display: none; }
   #pagenum { white-space: nowrap; flex: none; }
   /* 滚动模式下字号按钮用不上，藏起来让顶栏一排刚好放下、不挤压换行 */
@@ -345,7 +344,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     return h;
   }
   function updScrollUI() {
-    pagenum.textContent = '滚动中 · 速度' + spd + (paused ? ' · 已暂停' : '');
+    pagenum.textContent = '速度' + spd + (paused ? '·已暂停' : '');
     pauseBtn.textContent = paused ? '▶继续' : '⏸暂停';
   }
   function setPaused(p) { paused = p; updScrollUI(); }
