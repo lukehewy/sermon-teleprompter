@@ -49,13 +49,15 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   #nav #next { background: #0d3b2e; color: #fff; font-weight: bold; }
   #nav #next:active { background: #147a5b; }
   /* 自动滚动模式 */
-  #page.scrollmode { display: block; overflow-y: auto; }
+  #page.scrollmode { display: block; overflow-y: auto; touch-action: none; }
   #page.scrollmode #pageinner { margin: 0; }
   .sec-title { font-size: calc(var(--fs) * 1.15); font-weight: bold; color: #ffd54a;
                margin: 36px 0 20px; line-height: 1.4; }
   body.light .sec-title { color: #8a6d1b; }
   #spdDown, #spdUp { display: none; }
   body.scrolling #spdDown, body.scrolling #spdUp { display: inline-block; }
+  #pauseBtn { display: none; }
+  body.scrolling #pauseBtn { display: inline-block; }
   #scrollToggle.on { border-color: #ffd54a !important; color: #ffd54a !important; }
   body.light #scrollToggle.on { border-color: #8a6d1b !important; color: #8a6d1b !important; }
   :root { --fs: 34px; }
@@ -68,6 +70,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
       <button id="bigger">A＋</button>
       <button id="autofit">自动</button>
       <button id="scrollToggle">▶滚动</button>
+      <button id="pauseBtn">⏸暂停</button>
       <button id="spdDown">减速</button>
       <button id="spdUp">加速</button>
       <button id="theme">🌙/☀️</button>
@@ -256,7 +259,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     else if (e.clientX < w * 0.25) prev();
   });
   // 横竖屏切换时重算字号（手动模式下保持用户字号）
-  window.addEventListener('resize', function () { if (!manual) fitPage(); });
+  window.addEventListener('resize', function () { if (!manual && !scrollOn) fitPage(); });
 
   document.getElementById('bigger').addEventListener('click', function () {
     fs = Math.min(fs + 4, 72);
@@ -268,9 +271,9 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     if (scrollOn) { root.style.setProperty('--fs', fs + 'px'); saveSettings(); }
     else manualSize();
   });
-  // 回到自动一屏模式
+  // 回到自动一屏模式（滚动模式下点它会打乱滚动，先忽略）
   document.getElementById('autofit').addEventListener('click', function () {
-    fitPage();
+    if (!scrollOn) fitPage();
   });
   document.getElementById('theme').addEventListener('click', function () {
     document.body.classList.toggle('light');
@@ -310,6 +313,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   var scrollOn = false, paused = false, spd = 2, rafId = null, lastT = 0, savedIdx = 0;
   var SPDS = [0, 10, 14, 20, 28, 40, 56, 80]; /* 每秒像素，1~7 档 */
   var scrollToggle = document.getElementById('scrollToggle');
+  var pauseBtn = document.getElementById('pauseBtn');
   var nav = document.getElementById('nav');
   try {
     var sv2 = JSON.parse(localStorage.getItem(SETKEY) || 'null');
@@ -329,7 +333,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   }
   function updScrollUI() {
     pagenum.textContent = '滚动中 · 速度' + spd + (paused ? ' · 已暂停' : '');
-    scrollToggle.textContent = paused ? '▶继续' : '⏸暂停';
+    pauseBtn.textContent = paused ? '▶继续' : '⏸暂停';
   }
   function setPaused(p) { paused = p; updScrollUI(); }
   function togglePause() { if (scrollOn) setPaused(!paused); }
@@ -353,6 +357,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     root.style.setProperty('--fs', fs + 'px');
     nav.style.display = 'none';
     scrollToggle.classList.add('on');
+    scrollToggle.textContent = '■退出';
     page.scrollTop = 0;
     updScrollUI();
     cancelAnimationFrame(rafId);
@@ -370,6 +375,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     idx = savedIdx; render();
   }
   scrollToggle.addEventListener('click', function () { scrollOn ? exitScroll() : enterScroll(); });
+  pauseBtn.addEventListener('click', function () { togglePause(); });
   document.getElementById('spdDown').addEventListener('click', function () {
     if (spd > 1) { spd--; saveSettings(); if (scrollOn) updScrollUI(); }
   });
