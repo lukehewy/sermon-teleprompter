@@ -51,6 +51,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   /* 自动滚动模式 */
   #page.scrollmode { display: block; overflow-y: auto; touch-action: none; }
   #page.scrollmode #pageinner { margin: 0; }
+  #page.scrollmode #pbody { overflow-y: visible; }
   .sec-title { font-size: calc(var(--fs) * 1.15); font-weight: bold; color: #ffd54a;
                margin: 36px 0 20px; line-height: 1.4; }
   body.light .sec-title { color: #8a6d1b; }
@@ -259,7 +260,14 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     else if (e.clientX < w * 0.25) prev();
   });
   // 横竖屏切换时重算字号（手动模式下保持用户字号）
-  window.addEventListener('resize', function () { if (!manual && !scrollOn) fitPage(); });
+  // 转屏/尺寸变化：滚动模式下强制重绘一次（防转屏后内容区留白），翻页模式下自动适配字号
+  window.addEventListener('resize', function () {
+    if (scrollOn) {
+      page.style.display = 'none';
+      void page.offsetHeight; /* 强制回流重绘 */
+      page.style.display = '';
+    } else if (!manual) fitPage();
+  });
 
   document.getElementById('bigger').addEventListener('click', function () {
     fs = Math.min(fs + 4, 72);
