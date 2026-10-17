@@ -230,12 +230,24 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   document.getElementById('next').addEventListener('click', next);
   document.getElementById('prev').addEventListener('click', prev);
   document.addEventListener('keydown', function (e) {
+    var k = e.key;
     if (scrollOn) {
-      if (e.key === ' ') { togglePause(); e.preventDefault(); }
+      /* 滚动模式：右/下/空格/回车 = 暂停·继续；左/上 = 往回滚一屏 */
+      if (k === ' ' || k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === 'Enter') {
+        togglePause(); e.preventDefault();
+      } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') {
+        page.scrollTop = Math.max(0, page.scrollTop - page.clientHeight * 0.8);
+        e.preventDefault();
+      }
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === ' ') next();
-    if (e.key === 'ArrowLeft') prev();
+    /* 翻页模式：右/下/空格/回车 = 下一页；左/上 = 上一页 */
+    if (k === 'ArrowRight' || k === ' ' || k === 'PageDown' || k === 'ArrowDown' || k === 'Enter') {
+      next(); e.preventDefault();
+    }
+    if (k === 'ArrowLeft' || k === 'PageUp' || k === 'ArrowUp') {
+      prev(); e.preventDefault();
+    }
   });
   document.getElementById('page').addEventListener('click', function (e) {
     if (scrollOn) { togglePause(); return; }
