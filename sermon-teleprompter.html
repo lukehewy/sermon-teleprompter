@@ -25,7 +25,12 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   #topbar .grp { display: flex; gap: 8px; align-items: center; }
   #topbar button { font-size: 16px; padding: 8px 14px; border-radius: 10px;
                    border: 1px solid #555; background: transparent; color: inherit;
-                   cursor: pointer; }
+                   cursor: pointer; white-space: nowrap; flex: none; }
+  #topbar .grp { overflow-x: auto; scrollbar-width: none; }
+  #topbar .grp::-webkit-scrollbar { display: none; }
+  #pagenum { white-space: nowrap; flex: none; }
+  /* 滚动模式下字号按钮用不上，藏起来让顶栏一排刚好放下、不挤压换行 */
+  body.scrolling #smaller, body.scrolling #bigger, body.scrolling #autofit { display: none; }
   #installBtn { display: none; border-color: #ffd54a !important; color: #ffd54a !important; }
   #installBtn.show { display: inline-block; }
   body.light #installBtn { border-color: #8a6d1b !important; color: #8a6d1b !important; }
