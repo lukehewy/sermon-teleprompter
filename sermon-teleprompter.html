@@ -296,12 +296,12 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
 
   /* 自动滚动模式：整篇连起来匀速上滚，速度 1~5 可调 */
   var scrollOn = false, paused = false, spd = 2, rafId = null, lastT = 0, savedIdx = 0;
-  var SPDS = [0, 16, 30, 48, 72, 100]; /* 每秒像素 */
+  var SPDS = [0, 8, 12, 18, 28, 45, 70, 100]; /* 每秒像素，1~7 档 */
   var scrollToggle = document.getElementById('scrollToggle');
   var nav = document.getElementById('nav');
   try {
     var sv2 = JSON.parse(localStorage.getItem(SETKEY) || 'null');
-    if (sv2 && sv2.spd >= 1 && sv2.spd <= 5) spd = sv2.spd;
+    if (sv2 && sv2.spd >= 1 && sv2.spd <= 7) spd = sv2.spd;
   } catch (e2) {}
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function buildScroll() {
@@ -362,7 +362,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     if (spd > 1) { spd--; saveSettings(); if (scrollOn) updScrollUI(); }
   });
   document.getElementById('spdUp').addEventListener('click', function () {
-    if (spd < 5) { spd++; saveSettings(); if (scrollOn) updScrollUI(); }
+    if (spd < 7) { spd++; saveSettings(); if (scrollOn) updScrollUI(); }
   });
 
   /* ⟳更新：一键清除本地缓存并重新加载最新版 */
