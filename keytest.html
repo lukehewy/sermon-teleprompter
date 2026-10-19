@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>按键测试</title>
+<style>
+  body { font-family: sans-serif; text-align: center; padding: 40px 20px; background: #FFFDF7; }
+  h1 { font-size: 28px; }
+  #out { font-size: 40px; font-weight: bold; color: #D90429; margin: 30px 0; min-height: 120px; word-break: break-all; }
+  p { font-size: 20px; color: #555; }
+</style>
+</head>
+<body>
+<h1>按键测试</h1>
+<p>按遥控器上的任意键，下面会显示浏览器收到的键值</p>
+<div id="out">等待按键…</div>
+<script>
+  var out = document.getElementById('out');
+  function show(e) {
+    out.innerHTML = 'key=' + e.key + '<br>code=' + e.code + '<br>keyCode=' + e.keyCode;
+    e.preventDefault();
+  }
+  document.addEventListener('keydown', show);
+  document.addEventListener('keyup', show);
+</script>
+</body>
+</html>
