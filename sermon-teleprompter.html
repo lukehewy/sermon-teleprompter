@@ -294,22 +294,29 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   document.getElementById('next').addEventListener('click', next);
   document.getElementById('prev').addEventListener('click', prev);
   document.addEventListener('keydown', function (e) {
-    var k = e.key;
+    var k = e.key || '', kc = e.keyCode || 0, cd = e.code || '';
+    /* 蓝牙翻页器兼容：部分设备 e.key 报 Unidentified，用 keyCode/code 兜底识别 */
+    var isNext = (k === ' ' || k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === 'Enter'
+      || kc === 32 || kc === 39 || kc === 40 || kc === 34 || kc === 13
+      || cd === 'Space' || cd === 'ArrowRight' || cd === 'ArrowDown' || cd === 'PageDown' || cd === 'Enter');
+    var isPrev = (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp'
+      || kc === 37 || kc === 38 || kc === 33
+      || cd === 'ArrowLeft' || cd === 'ArrowUp' || cd === 'PageUp');
     if (scrollOn) {
       /* 滚动模式：右/下/空格/回车 = 暂停·继续；左/上 = 往回滚一屏 */
-      if (k === ' ' || k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === 'Enter') {
+      if (isNext) {
         togglePause(); e.preventDefault();
-      } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') {
+      } else if (isPrev) {
         page.scrollTop = Math.max(0, page.scrollTop - page.clientHeight * 0.8);
         e.preventDefault();
       }
       return;
     }
     /* 翻页模式：右/下/空格/回车 = 下一页；左/上 = 上一页 */
-    if (k === 'ArrowRight' || k === ' ' || k === 'PageDown' || k === 'ArrowDown' || k === 'Enter') {
+    if (isNext) {
       next(); e.preventDefault();
     }
-    if (k === 'ArrowLeft' || k === 'PageUp' || k === 'ArrowUp') {
+    if (isPrev) {
       prev(); e.preventDefault();
     }
   });

@@ -1,5 +1,5 @@
 /* 讲道提词器离线缓存：装好后没网也能用 */
-var CACHE = 'sermon-tp-v13';
+var CACHE = 'sermon-tp-v14';
 var FILES = [
   './sermon-teleprompter.html',
   './manifest.webmanifest',
