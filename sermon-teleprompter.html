@@ -272,9 +272,11 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     });
   })();
 
-  /* 自动滚动模式：整篇连起来匀速上滚，速度 1~5 可调 */
-  var scrollOn = false, paused = false, spd = 2, rafId = null, lastT = 0, savedIdx = 0;
-  var SPDS = [0, 10, 14, 20, 28, 40, 56, 80]; /* 每秒像素，1~7 档 */
+  /* 自动滚动模式：整篇连起来匀速上滚，速度 1~7 档，按「行/分钟」计速：
+     先按当前字号折算一行高度，各设备（手机/平板/电脑）同档同感；
+     定时器驱动，窗口不在最前面也不会停 */
+  var scrollOn = false, paused = false, spd = 2, timerId = null, lastT = 0, savedIdx = 0;
+  var SPDL = [0, 9, 13, 19, 26, 37, 52, 74]; /* 每分钟行数，1~7 档；2 档≈原平板体感 */
   var scrollToggle = document.getElementById('scrollToggle');
   var pauseBtn = document.getElementById('pauseBtn');
   var nav = document.getElementById('nav');
@@ -300,14 +302,16 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   }
   function setPaused(p) { paused = p; updScrollUI(); }
   function togglePause() { if (scrollOn) setPaused(!paused); }
-  function loop(t) {
+  function tick() {
     if (!scrollOn) return;
-    var dt = (t - lastT) / 1000; lastT = t;
-    if (!paused) {
-      page.scrollTop += SPDS[spd] * dt;
+    var now = performance.now();
+    var dt = (now - lastT) / 1000; lastT = now;
+    if (dt > 1) dt = 1; /* 切窗口/休眠回来不跳一大截 */
+    if (!paused && dt > 0) {
+      var lh = fs * 1.9; /* 与 CSS #pbody 的 line-height:1.9 对应 */
+      page.scrollTop += SPDL[spd] * lh / 60 * dt;
       if (page.scrollTop + page.clientHeight >= page.scrollHeight - 2) setPaused(true);
     }
-    rafId = requestAnimationFrame(loop);
   }
   function enterScroll() {
     scrollOn = true; paused = false; savedIdx = idx;
@@ -323,13 +327,13 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     scrollToggle.textContent = '■退出';
     page.scrollTop = 0;
     updScrollUI();
-    cancelAnimationFrame(rafId);
+    if (timerId) clearInterval(timerId);
     lastT = performance.now();
-    rafId = requestAnimationFrame(loop);
+    timerId = setInterval(tick, 50);
   }
   function exitScroll() {
     scrollOn = false; paused = false;
-    cancelAnimationFrame(rafId); rafId = null;
+    if (timerId) { clearInterval(timerId); timerId = null; }
     document.body.classList.remove('scrolling');
     page.classList.remove('scrollmode');
     nav.style.display = '';
