@@ -1,7 +1,11 @@
-/* 讲道提词器离线缓存：装好后没网也能用 */
-var CACHE = 'sermon-tp-v14';
+/* 讲道提词器离线缓存：装好后没网也能用；有网时永远取最新版（讲章库版） */
+var CACHE = 'sermon-tp-v15';
 var FILES = [
+  './index.html',
   './sermon-teleprompter.html',
+  './hs4.js',
+  './shengling-work.js',
+  './judges10.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
@@ -21,21 +25,13 @@ self.addEventListener('activate', function(e){
   );
 });
 self.addEventListener('fetch', function(e){
-  var url = new URL(e.request.url);
-  var isDoc = e.request.mode === 'navigate' ||
-              url.pathname.indexOf('sermon-teleprompter.html') !== -1;
-  if (isDoc) {
-    /* 讲章正文：有网时永远取最新版，断网时才用缓存 */
-    e.respondWith(
-      fetch(e.request).then(function(resp){
-        var copy = resp.clone();
-        caches.open(CACHE).then(function(c){ c.put(e.request, copy); });
-        return resp;
-      }).catch(function(){ return caches.match(e.request); })
-    );
-  } else {
-    e.respondWith(
-      caches.match(e.request).then(function(r){ return r || fetch(e.request); })
-    );
-  }
+  if (e.request.method !== 'GET') return;
+  /* 有网取最新并顺手更新缓存；断网用缓存 */
+  e.respondWith(
+    fetch(e.request).then(function(resp){
+      var copy = resp.clone();
+      caches.open(CACHE).then(function(c){ c.put(e.request, copy); });
+      return resp;
+    }).catch(function(){ return caches.match(e.request); })
+  );
 });

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#141428">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<title>讲道提词器 · 讲章库</title>
+<script>
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
+</script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+         background: #111; color: #f5f5f5; min-height: 100vh; min-height: 100dvh;
+         padding: 28px 20px 40px; max-width: 760px; margin: 0 auto; user-select: none; }
+  h1 { font-size: 26px; margin: 8px 0 6px; }
+  .hint { font-size: 14px; opacity: .6; margin: 0 0 24px; line-height: 1.7; }
+  a.card { display: block; text-decoration: none; color: inherit;
+           background: #1d1d1d; border: 1px solid #333; border-radius: 14px;
+           padding: 20px 22px; margin-bottom: 14px; }
+  a.card:active { background: #262626; }
+  .t { font-size: 21px; font-weight: bold; color: #ffd54a; margin-bottom: 8px; line-height: 1.4; }
+  .d { font-size: 14px; opacity: .6; }
+  .foot { margin-top: 30px; font-size: 13px; opacity: .45; line-height: 1.8; }
+</style>
+</head>
+<body>
+  <h1>📚 讲章库</h1>
+  <p class="hint">点一篇讲章进入提词器。讲道时用空格/方向键或屏幕按钮翻页，蓝牙键盘、翻页器也能用。</p>
+  <a class="card" href="sermon-teleprompter.html?s=hs4">
+    <div class="t">认识圣灵（四）：圣灵的工作（续）</div>
+    <div class="d">2026-10-18 · 认识圣灵系列 · 62 页</div>
+  </a>
+  <a class="card" href="sermon-teleprompter.html?s=shengling-work">
+    <div class="t">圣灵的工作</div>
+    <div class="d">讲章7 · 2026-10-12 · 36 页</div>
+  </a>
+  <a class="card" href="sermon-teleprompter.html?s=judges10">
+    <div class="t">士师记第十课：亚比米勒</div>
+    <div class="d">生命树查经班 · 15 页</div>
+  </a>
+  <p class="foot">新讲章写好后发给助手，排好版添进这个库，不覆盖旧篇。提词器里点「📚目录」可以随时回到这一页换讲章。</p>
+</body>
+</html>
