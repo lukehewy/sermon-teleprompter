@@ -1,8 +1,9 @@
 /* 讲道提词器离线缓存：装好后没网也能用；有网时永远取最新版（讲章库版） */
-var CACHE = 'sermon-tp-v17';
+var CACHE = 'sermon-tp-v18';
 var FILES = [
   './index.html',
   './sermon-teleprompter.html',
+  './hs5.js',
   './hs4.js',
   './shengling-work.js',
   './judges10.js',
