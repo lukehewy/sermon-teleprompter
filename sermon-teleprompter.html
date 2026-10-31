@@ -102,17 +102,17 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
 <script>
   /* 讲章库加载器：按 ?s= 选讲章数据文件，缺省打开最近一篇 */
   (function () {
-    var s = 'hs4';
-    try { s = new URLSearchParams(location.search).get('s') || 'hs4'; } catch (e) {}
-    if (!/^[a-z0-9-]+$/.test(s)) s = 'hs4';
+    var s = 'hs5';
+    try { s = new URLSearchParams(location.search).get('s') || 'hs5'; } catch (e) {}
+    if (!/^[a-z0-9-]+$/.test(s)) s = 'hs5';
     document.write('<script src="' + s + '.js"><\/script>');
   })();
 </script>
 <script>
 (function () {
-  // 认识圣灵（四）：圣灵的工作（续）(新版)—— 一字不改，只分页
-  // 讲章数据由外部数据文件提供（讲章库：?s=<id>，默认 hs4）；正文一字不改，只换容器
-  var SERMON_ID = (window.SERMON_DATA && window.SERMON_DATA.id) || 'hs4';
+  // 讲章库壳 —— 正文一字不改，只分页
+  // 讲章数据由外部数据文件提供（讲章库：?s=<id>，默认 hs5）；正文一字不改，只换容器
+  var SERMON_ID = (window.SERMON_DATA && window.SERMON_DATA.id) || 'hs5';
   var PAGES = window.SERMON_DATA.pages;
   document.title = '讲道提词器 · ' + window.SERMON_DATA.title;
 
