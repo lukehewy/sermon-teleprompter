@@ -49,6 +49,8 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   body.light #pbody .kw { color: #0b5cad; }
   #pbody p.ql { color: #ffb86b; }
   body.light #pbody p.ql { color: #b35c00; }
+  #pbody .hard { color: #e08fff; font-weight: bold; }
+  body.light #pbody .hard { color: #8e24aa; }
   #nav { flex: none; display: flex; }
   #nav button { flex: 1; padding: 22px 0; font-size: 22px; border: none;
                 background: #1d1d1d; color: #ccc; cursor: pointer; }
@@ -167,7 +169,8 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   }
 
   function fmt(t) {
-    return esc(t).replace(/⟦(.+?)⟧/g, '<span class="kw">$1</span>');
+    return esc(t).replace(/⟦(.+?)⟧/g, '<span class="kw">$1</span>')
+                 .replace(/⟪(.+?)⟫/g, '<span class="hard">$1</span>');
   }
   function render() {
     var p = PAGES[idx];
