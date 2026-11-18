@@ -45,6 +45,10 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
   #pbody p { margin: 0 0 22px; }
   #pbody .verse { color: #9fd8c3; }
   body.light #pbody .verse { color: #0d6e5f; }
+  #pbody .kw { color: #7fd4ff; font-weight: bold; }
+  body.light #pbody .kw { color: #0b5cad; }
+  #pbody p.ql { color: #ffb86b; }
+  body.light #pbody p.ql { color: #b35c00; }
   #nav { flex: none; display: flex; }
   #nav button { flex: 1; padding: 22px 0; font-size: 22px; border: none;
                 background: #1d1d1d; color: #ccc; cursor: pointer; }
@@ -162,14 +166,19 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     saveSettings();
   }
 
+  function fmt(t) {
+    return esc(t).replace(/⟦(.+?)⟧/g, '<span class="kw">$1</span>');
+  }
   function render() {
     var p = PAGES[idx];
     ptitle.textContent = p.title;
     pbody.innerHTML = '';
+    var isQ = /先想一想|开场问题|讨论/.test(p.title);
     p.body.forEach(function (t) {
       var el = document.createElement('p');
       if (/章|節/.test(t) && t.length < 80) el.className = 'verse';
-      el.textContent = t;
+      else if (isQ) el.className = 'ql';
+      el.innerHTML = fmt(t);
       pbody.appendChild(el);
     });
     pagenum.textContent = (idx + 1) + ' / ' + PAGES.length;
@@ -290,8 +299,8 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     PAGES.forEach(function (p) {
       h += '<div class="sec-title">' + esc(p.title) + '</div>';
       p.body.forEach(function (t) {
-        var cls = (/章|節/.test(t) && t.length < 80) ? ' class="verse"' : '';
-        h += '<p' + cls + '>' + esc(t) + '</p>';
+        var cls = (/章|節/.test(t) && t.length < 80) ? ' class="verse"' : ((/先想一想|开场问题|讨论/.test(p.title)) ? ' class="ql"' : '');
+        h += '<p' + cls + '>' + fmt(t) + '</p>';
       });
     });
     return h;
