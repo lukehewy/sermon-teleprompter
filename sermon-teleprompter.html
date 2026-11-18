@@ -11,6 +11,15 @@
 <title>讲道提词器 · 认识圣灵（四）</title>
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
+/* 平板/手机浏览器可视高度修正：100dvh 在有些浏览器里比实际可见区高，底部按钮会被挤出画面；
+   改用 innerHeight（实际可见高度）锁定 body 高度，按钮永远在画面内 */
+(function(){
+  function fixH(){ document.body.style.height = window.innerHeight + 'px'; }
+  window.addEventListener('resize', fixH);
+  window.addEventListener('orientationchange', function(){ setTimeout(fixH, 60); });
+  document.addEventListener('DOMContentLoaded', fixH);
+  fixH();
+})();
 </script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
