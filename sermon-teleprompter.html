@@ -179,8 +179,8 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     var isQ = /先想一想|开场问题|讨论/.test(p.title);
     p.body.forEach(function (t) {
       var el = document.createElement('p');
-      if (/章|節/.test(t) && t.length < 80) el.className = 'verse';
-      else if (isQ) el.className = 'ql';
+      if (isQ) el.className = 'ql';
+      else if (/章|節/.test(t) && t.length < 80) el.className = 'verse';
       el.innerHTML = fmt(t);
       pbody.appendChild(el);
     });
@@ -302,7 +302,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
     PAGES.forEach(function (p) {
       h += '<div class="sec-title">' + esc(p.title) + '</div>';
       p.body.forEach(function (t) {
-        var cls = (/章|節/.test(t) && t.length < 80) ? ' class="verse"' : ((/先想一想|开场问题|讨论/.test(p.title)) ? ' class="ql"' : '');
+        var cls = ((/先想一想|开场问题|讨论/.test(p.title)) ? ' class="ql"' : ((/章|節/.test(t) && t.length < 80) ? ' class="verse"' : ''));
         h += '<p' + cls + '>' + fmt(t) + '</p>';
       });
     });
